@@ -1,0 +1,3 @@
+CREATE USER laravel WITH PASSWORD 'secret';
+CREATE DATABASE tgbot_db;
+GRANT ALL PRIVILEGES ON DATABASE tgbot_db TO laravel;
