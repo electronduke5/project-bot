@@ -10,6 +10,7 @@ use App\Models\UserPost;
 use App\Repositories\Contracts\PostRepositoryContract;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
+use GraphQL\Error\Error;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class PostRepository extends BaseRepository implements PostRepositoryContract
@@ -57,9 +58,17 @@ class PostRepository extends BaseRepository implements PostRepositoryContract
                         $secondsLeft = $now->diffInSeconds($nextRequestTime);
                         $minutes = floor($secondsLeft / 60);
                         $seconds = $secondsLeft % 60;
-                        throw new \InvalidArgumentException(
+                        throw new Error(
                             ($minutes > 0 ? $minutes . ' мин. ' : '') .
-                            $seconds . ' сек.');
+                            $seconds . ' сек.',
+                            null,
+                            null,
+                            [],
+                            null,
+                            null,
+                            ['code' => 'TIMEOUT'],
+
+                        );
                     }
                 }
 
