@@ -49,11 +49,12 @@ class PostRepository extends BaseRepository implements PostRepositoryContract
 
                 // Проверяем timeout
                 $now = Carbon::now();
-                $interval = CarbonInterval::createFromFormat('H:i:s', $user->timeout);
                 if ($user->last_request && $user->timeout) {
-                    $timeoutEnd = Carbon::parse($user->last_request)->add($interval);
-                    if ($timeoutEnd > $now) {
-                        $secondsLeft = $now->diffInSeconds($timeoutEnd);
+                    $timeoutInSeconds = CarbonInterval::createFromFormat('H:i:s', $user->timeout)->totalSeconds;
+                    $nextRequestTime = Carbon::parse($user->last_request)->addSeconds($timeoutInSeconds);
+
+                    if ($nextRequestTime  > $now) {
+                        $secondsLeft = $now->diffInSeconds($nextRequestTime);
                         $minutes = floor($secondsLeft / 60);
                         $seconds = $secondsLeft % 60;
                         throw new \InvalidArgumentException(
