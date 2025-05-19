@@ -27,6 +27,7 @@
         DB_PASSWORD: ${DB_PASSWORD}
         APP_ENV: local
         APP_KEY: ${APP_KEY}
+        FILESYSTEM_DISK: ${FILESYSTEM_DISK}
       volumes:
         - ./backend:/var/www/html
       networks:
