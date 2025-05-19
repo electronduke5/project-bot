@@ -1,27 +1,54 @@
 FROM php:8.3-fpm
 
-  RUN apt-get update && apt-get install -y \
-      git \
-      curl \
-      libpq-dev \
-      libpng-dev \
-      libonig-dev \
-      libxml2-dev \
-      zip \
-      unzip \
-      && docker-php-ext-install pdo pdo_pgsql mbstring exif pcntl bcmath gd
+# Установка системных зависимостей
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpq-dev \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    && docker-php-ext-install pdo pdo_pgsql mbstring exif pcntl bcmath gd \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-  COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Установка Composer (правильный способ)
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-  WORKDIR /var/www/html
+# Временная рабочая директория для установки зависимостей
+WORKDIR /tmp
 
-  COPY . .
+# Копируем только composer файлы
+COPY composer.json composer.lock ./
 
-  RUN composer install --optimize-autoloader --no-dev
+# Установка зависимостей
+RUN composer install --no-dev --no-scripts --no-autoloader
 
-  RUN chown -R www-data:www-data /var/www/html \
-      && chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
+# Основная рабочая директория
+WORKDIR /var/www/html
 
-  EXPOSE 9000
+# Копируем весь код
+COPY . .
 
-  CMD ["php-fpm"]
+# Финализация autoloader
+RUN composer dump-autoload --optimize
+
+# Создаем необходимые директории
+RUN mkdir -p storage/app/public \
+    && mkdir -p storage/framework/{cache,sessions,views} \
+    && mkdir -p bootstrap/cache
+
+# Устанавливаем права
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
+
+# Альтернатива storage:link через копирование
+RUN rm -rf public/storage \
+    && mkdir -p public/storage \
+    && cp -r storage/app/public/* public/storage/ || true
+
+EXPOSE 9000
+
+CMD ["php-fpm"]
