@@ -84,7 +84,8 @@ class PostRepository extends BaseRepository implements PostRepositoryContract
 
                 // Получаем все посты с шансами редкости
                 $posts = $query->get()->shuffle();
-                Log::info("Shuffle posts: {$posts}");
+                $firstFiveIds = $posts->take(5)->pluck('id')->implode(', ');
+                Log::info("First 5 post IDs: [{$firstFiveIds}]");
                 if ($posts->isEmpty()) {
                     throw new ModelNotFoundException('Посты не найдены для указанных параметров.');
                 }
