@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use GraphQL\Error\Error;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
 
 class PostRepository extends BaseRepository implements PostRepositoryContract
 {
@@ -82,7 +83,8 @@ class PostRepository extends BaseRepository implements PostRepositoryContract
                 }
 
                 // Получаем все посты с шансами редкости
-                $posts = $query->get();
+                $posts = $query->get()->shuffle();
+                Log::info("Shuffle posts: {$posts}");
                 if ($posts->isEmpty()) {
                     throw new ModelNotFoundException('Посты не найдены для указанных параметров.');
                 }
@@ -99,7 +101,9 @@ class PostRepository extends BaseRepository implements PostRepositoryContract
 
                 // Выбираем случайный пост с учётом весов
                 $totalWeight = array_sum(array_column($weightedPosts, 'weight'));
+                Log::info("total Weight: $totalWeight");
                 $randomValue = mt_rand(0, (int)($totalWeight * 100)) / 100; // Для большей точности
+                Log::info("randomValue: $randomValue");
                 $currentWeight = 0;
 
                 foreach ($weightedPosts as $weightedPost) {
