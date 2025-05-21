@@ -29,7 +29,7 @@ class UserTopQuery extends Query
             'sort_by' => [
                 'name' => 'sort_by',
                 'type' => Type::string(),
-                'description' => 'Поле для сортировки (points|posts_count)',
+                'description' => 'Поле для сортировки (points|posts)',
                 'defaultValue' => 'points'
             ],
             'chat_id' => [
@@ -54,7 +54,7 @@ class UserTopQuery extends Query
         $query = User::query();
 
         // Сортировка
-        if ($sortBy === 'posts_count') {
+        if ($sortBy === 'posts') {
             $query->withCount('posts')->orderByDesc('posts_count');
         } else {
             $query->orderByDesc('points');
