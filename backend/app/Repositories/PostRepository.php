@@ -107,10 +107,11 @@ class PostRepository extends BaseRepository implements PostRepositoryContract
                 Log::info("randomValue: $randomValue");
                 $currentWeight = 0;
 
-                foreach ($weightedPosts as $weightedPost) {
+                foreach ($weightedPosts as $index => $weightedPost) {
                     $currentWeight += $weightedPost['weight'];
                     if ($randomValue <= $currentWeight) {
                         $selectedPost = $weightedPost['post'];
+                        Log::info("Selected post index: $index | Post ID: {$selectedPost->id}");
                         break;
                     }
                 }
