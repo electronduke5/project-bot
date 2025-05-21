@@ -33,7 +33,7 @@ class UserTopQuery extends Query
                 'defaultValue' => 'points'
             ],
             'chat_id' => [
-                'name' => 'sort_by',
+                'name' => 'chat_id',
                 'type' => Type::string(),
                 'description' => 'ID Телеграм чата',
             ]
