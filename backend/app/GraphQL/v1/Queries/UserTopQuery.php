@@ -12,7 +12,7 @@ class UserTopQuery extends Query
 
     protected $attributes = [
         'name' => 'userTop',
-        'description' => 'Топ пользователей по очкам',
+        'description' => 'Топ пользователей по очкам или количеству постов',
     ];
 
     public function args(): array
@@ -23,6 +23,12 @@ class UserTopQuery extends Query
                 'type' => Type::int(),
                 'description' => 'Количество пользователей в топе',
                 'defaultValue' => 15
+            ],
+            'sort_by' => [
+                'name' => 'sort_by',
+                'type' => Type::string(),
+                'description' => 'Поле для сортировки (points|posts_count)',
+                'defaultValue' => 'points'
             ]
         ];
     }
@@ -35,11 +41,20 @@ class UserTopQuery extends Query
     public function resolve($root, $args)
     {
         $limit = $args['limit'] ?? 15;
+        $sortBy = $args['sort_by'] ?? 'points';
 
-        return User::query()
-            ->orderByDesc('points') // Сортировка по убыванию очков
-            ->take($limit)           // Ограничение количества
-            ->get();
+        $query = User::query();
+
+        // Если сортируем по количеству постов, добавляем join и подсчет
+        if ($sortBy === 'posts_count') {
+            $query->withCount('posts')
+                ->orderByDesc('posts_count');
+        } else {
+            // По умолчанию сортируем по очкам
+            $query->orderByDesc('points');
+        }
+
+        return $query->take($limit)->get();
     }
 
 
